@@ -1,6 +1,7 @@
 import { auth } from "@clerk/nextjs";
 import { NextResponse } from "next/server";
 import { Configuration, OpenAIApi } from "openai";
+import { incrementApiLimit, checkApiLimit } from "@/lib/api-limit";
 
 const configuration = new Configuration({
     apiKey: process.env.OPENAI_API_KEY,
@@ -41,12 +42,20 @@ export async function POST(req: Request) {
             return NextResponse.json("Please enter a resolution", { status: 400 });
         }
 
+        const freeTrial = await checkApiLimit();
+
+        if(!freeTrial){
+            return NextResponse.json("Free trial limit expired.", { status: 403 });
+        }
+
         // OpenAIのChat Completion APIを使用して応答を生成
         const response = await openai.createImage({
             prompt,
             n: parseInt(amount, 10),
             size: resolution,
         });
+
+        await incrementApiLimit();
 
         // 応答の最初のメッセージを返す
         return NextResponse.json(response.data.data);
