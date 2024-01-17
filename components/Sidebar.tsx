@@ -6,6 +6,7 @@ import { Montserrat } from "next/font/google"
 import { cn } from "@/lib/utils"
 import { LayoutDashboard, MessageSquare, ImageIcon, VideoIcon, Music, Code, Settings } from "lucide-react"
 import { usePathname } from "next/navigation"
+import { FreeCounter } from "@/components/FreeCounter"
 
 const montserrat = Montserrat({ weight: "600", subsets: ["latin"] })
 
@@ -53,7 +54,11 @@ const routes = [
     },
   ];
 
-const Sidebar = () => {
+  interface SidebarProps {
+    apiLimitCount: number
+  }
+
+const Sidebar = ({ apiLimitCount = 0 }: SidebarProps) => {
   const pathname = usePathname()
 
   return (
@@ -85,6 +90,7 @@ const Sidebar = () => {
                 ))}
             </div>
         </div>
+        <FreeCounter apiLimitCount={apiLimitCount} />
     </div>
   )
 }

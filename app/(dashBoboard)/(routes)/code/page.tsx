@@ -18,9 +18,11 @@ import UserAvatar from "@/components/User-avatar"
 import { BotAvatar } from "@/components/Bot-avatar"
 import { Loader } from "@/components/Loader"
 import ReactMarkdown from "react-markdown";
+import { useProModal } from "@/hooks/use-pro-modal"
 
 
 const CodePage = () => {
+  const proModal = useProModal();
   const router = useRouter(); 
   const [messages, setMessages] = useState<ChatCompletionRequestMessage[]>([]);
   
@@ -54,7 +56,10 @@ const CodePage = () => {
 
         // フォームをリセット
         form.reset()
-    } catch (error) {
+    } catch (error: any) {
+        if(error?.response?.status === 403) {
+            proModal.onOpen();
+        }
         console.log(error);
     } finally {
         // ページをリフレッシュ
