@@ -16,7 +16,7 @@ export async function POST(req: Request) {
 
         // リクエストのボディを取得
         const body = await req.json();
-        const { messages } = body;
+        const { prompt, amount = "1", resolution = "512x512" } = body;
 
         // ユーザーが認証されていない場合は、401 Unauthorizedを返す
         if (!userId) {
@@ -29,21 +29,30 @@ export async function POST(req: Request) {
         }
 
         // メッセージが指定されていない場合は、400 Bad Requestを返す
-        if (!messages) {
+        if (!prompt) {
             return NextResponse.json("Please enter a prompt", { status: 400 });
         }
 
+        if(!amount){
+            return NextResponse.json("Please enter an amount", { status: 400 });
+        }
+
+        if(!resolution){
+            return NextResponse.json("Please enter a resolution", { status: 400 });
+        }
+
         // OpenAIのChat Completion APIを使用して応答を生成
-        const response = await openai.createChatCompletion({
-            model: "gpt-3.5-turbo",
-            messages
+        const response = await openai.createImage({
+            prompt,
+            n: parseInt(amount, 10),
+            size: resolution,
         });
 
         // 応答の最初のメッセージを返す
-        return NextResponse.json(response.data.choices[0].message);
+        return NextResponse.json(response.data.data);
 
     } catch (error) {
-        console.log("[Conversation] Error:", error);
+        console.log("[Image] Error:", error);
         return new NextResponse("Internal Server Error", { status: 500 });
     }
 }
