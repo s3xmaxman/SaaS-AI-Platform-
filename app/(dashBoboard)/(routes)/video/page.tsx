@@ -17,6 +17,7 @@ import UserAvatar from "@/components/User-avatar"
 import { BotAvatar } from "@/components/Bot-avatar"
 import { Loader } from "@/components/Loader"
 import { useProModal } from "@/hooks/use-pro-modal"
+import toast from "react-hot-toast"
 
 
 const VideoPage = () => {
@@ -35,8 +36,7 @@ const VideoPage = () => {
 
     const onSubmit = async(value: z.infer<typeof formSchema>) => {
         try {
-          
-
+        
            setVideo(undefined)
            
            const response = await axios.post("/api/video", value)
@@ -47,8 +47,9 @@ const VideoPage = () => {
         } catch (error: any) {
             if(error?.response?.status === 403) {
                 proModal.onOpen();
-            }
-            console.log(error);
+            } else {
+              toast.error("Something went wrong")
+            }   
         } finally {
             router.refresh();
         }

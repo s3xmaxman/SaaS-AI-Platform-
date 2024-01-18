@@ -2,6 +2,7 @@ import { auth } from "@clerk/nextjs";
 import { NextResponse } from "next/server";
 import Replicate from "replicate";
 import { incrementApiLimit, checkApiLimit } from "@/lib/api-limit";
+import { checkSubscription } from "@/lib/subscription";
 
 
 const replicate = new Replicate({
@@ -29,8 +30,9 @@ export async function POST(req: Request) {
         }
 
         const freeTrial = await checkApiLimit();
+        const subscription = await checkSubscription();
 
-        if (!freeTrial) {
+        if (!freeTrial && !subscription) {
             return NextResponse.json("Free trial limit expired.", { status: 403 });
         }
 
@@ -43,7 +45,9 @@ export async function POST(req: Request) {
             }
           );
 
-        await incrementApiLimit();
+        if(!subscription) {
+            await incrementApiLimit();
+        }
 
         // 応答の最初のメッセージを返す
         return NextResponse.json(response);
